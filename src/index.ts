@@ -1,6 +1,6 @@
 import { KeyboardState } from "./utils/keyboardState";
 
-const keyboard = new KeyboardState();
+const keyboard = new KeyboardState().connect();
 
 const handleKeypress = () => {
   if (keyboard.pressed("W") || keyboard.pressed("ArrowUp")) {
@@ -29,3 +29,7 @@ const animate = () => {
 };
 
 animate();
+
+setTimeout(() => {
+  keyboard.destory();
+}, 30e3);

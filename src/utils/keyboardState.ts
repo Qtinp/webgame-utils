@@ -2,14 +2,22 @@ import { KeyCode } from "./keyCode";
 
 export class KeyboardState {
   readonly keyCodes = new Set<string>();
+
+  private eventListener: (ev: KeyboardEvent) => void;
   private shiftKey = false;
   private ctrlKey = false;
   private altKey = false;
 
   /** @param domElement GlobalEventHandlers */
-  constructor(private domElement: GlobalEventHandlers = window) {
-    this.domElement.addEventListener("keydown", this._onKeydown.bind(this));
-    this.domElement.addEventListener("keyup", this._onKeyup.bind(this));
+  constructor(private domElement: GlobalEventHandlers = document) {
+    this.eventListener = (ev: KeyboardEvent) => {
+      switch (ev.type) {
+        case "keydown":
+          return this.onKeydown(ev);
+        case "keyup":
+          return this.onKeyup(ev);
+      }
+    };
   }
 
   /** @param keys [KeyCode] */
@@ -41,22 +49,30 @@ export class KeyboardState {
     return this.keyCodes.has(trueCode);
   }
 
-  private _onKeydown(ev: KeyboardEvent) {
+  private onKeydown(ev: KeyboardEvent) {
     this.keyCodes.add(ev.code);
     this.shiftKey = ev.shiftKey;
     this.ctrlKey = ev.ctrlKey;
     this.altKey = ev.altKey;
   }
 
-  private _onKeyup(ev: KeyboardEvent) {
+  private onKeyup(ev: KeyboardEvent) {
     this.keyCodes.delete(ev.code);
     this.shiftKey = ev.shiftKey;
     this.ctrlKey = ev.ctrlKey;
     this.altKey = ev.altKey;
   }
 
+  connect() {
+    this.keyCodes.clear();
+    this.domElement.addEventListener("keydown", this.eventListener);
+    this.domElement.addEventListener("keyup", this.eventListener);
+    return this;
+  }
+
   destory() {
-    this.domElement.removeEventListener("keydown", this._onKeydown.bind(this));
-    this.domElement.removeEventListener("keyup", this._onKeyup.bind(this));
+    this.domElement.removeEventListener("keydown", this.eventListener);
+    this.domElement.removeEventListener("keyup", this.eventListener);
+    this.keyCodes.clear();
   }
 }
