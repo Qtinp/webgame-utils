@@ -17,9 +17,11 @@ type ListenerFn<
   Maps extends EventMap = DefaultEventMap,
   Ev extends EventType = keyof Maps,
 > = Ev extends typeof Emitter.AnyEvent
-  ? (data: any) => void
+  ? (args: any[]) => void
   : Maps[Ev] extends (...args: any[]) => void
   ? Maps[Ev]
+  : unknown extends Maps[Ev]
+  ? (...args: unknown[]) => void
   : (data: Maps[Ev]) => void;
 
 type EventNames<Maps extends EventMap = DefaultEventMap> = keyof Maps;
